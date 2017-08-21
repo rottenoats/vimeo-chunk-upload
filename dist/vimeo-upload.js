@@ -563,7 +563,7 @@ var App = (function () {
                 _this.updateVideo(vimeoId);
             }
             catch (error) {
-                console.log("Error retrieving Vimeo Id.");
+                console.log("Error retrieving Vimeo Id.", error);
             }
             console.log("Delete success:", response);
         })["catch"](function (error) {
