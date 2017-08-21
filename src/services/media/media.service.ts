@@ -55,7 +55,7 @@ export class MediaService {
      * @param {object} data
      * @returns {{id: number, link: (any|HTMLLinkElement|(function(string): string)), name: any, uri: any, createdTime: any}}
      */
-    public static GetMeta(vimeoId: number, data: any = null): Object{
+    public static GetMeta(vimeoId: number, data: any = {}): Object{
         return {
             id:             vimeoId,
             link:           data.link           || null,
