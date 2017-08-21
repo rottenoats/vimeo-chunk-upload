@@ -315,7 +315,8 @@ exports.DEFAULT_VALUES = {
     maxAcceptedUploadDuration: 60,
     useDefaultFileName: false,
     retryTimeout: 5000,
-    videoData: {} //See link for a full list of supported metaData | https://developer.vimeo.com/api/endpoints/videos#PATCH/videos/{video_id}
+    videoData: {},
+    editVideoOnComplete: true
 };
 exports.DEFAULT_EVENTS = {
     chunkprogresschanged: function (event) { return console.log("Default: Chunk Progress Update: " + event.detail + "/100"); },
@@ -452,7 +453,7 @@ var App = (function () {
         }
         this.maxAcceptedFails = values.maxAcceptedFails;
         this.httpService = new http_service_1.HttpService(values.maxAcceptedUploadDuration);
-        this.mediaService = new media_service_1.MediaService(this.httpService, values.file, values.videoData, values.upgrade_to_1080, values.useDefaultFileName);
+        this.mediaService = new media_service_1.MediaService(this.httpService, values.file, values.videoData, values.upgrade_to_1080, values.useDefaultFileName, values.editVideoOnComplete);
         this.chunkService = new chunk_service_1.ChunkService(this.mediaService, values.preferredUploadDuration, values.chunkSize);
         this.statService = new stat_service_1.StatService(values.timeInterval, this.chunkService);
         this.ticketService = new ticket_service_1.TicketService(values.token, this.httpService, values.upgrade_to_1080);
@@ -575,12 +576,21 @@ var App = (function () {
      * @param vimeoId
      */
     App.prototype.updateVideo = function (vimeoId) {
-        this.mediaService.updateVideoData(this.ticketService.token, vimeoId).then(function (response) {
-            var meta = media_service_1.MediaService.GetMeta(vimeoId, response.data);
-            event_service_1.EventService.Dispatch("vimeouploadcomplete", meta);
-        })["catch"](function (error) {
-            event_service_1.EventService.Dispatch("vimeouploaderror", { message: "Unable to update video " + vimeoId + " with name and description.", error: error });
-        });
+        if (this.mediaService.editVideoOnComplete) {
+            this.mediaService.updateVideoData(this.ticketService.token, vimeoId).then(function (response) {
+                var meta = media_service_1.MediaService.GetMeta(vimeoId, response.data);
+                event_service_1.EventService.Dispatch("vimeouploadcomplete", meta);
+            })["catch"](function (error) {
+                event_service_1.EventService.Dispatch("vimeouploaderror", {
+                    message: "Unable to update video " + vimeoId + " with name and description.",
+                    error: error
+                });
+                event_service_1.EventService.Dispatch("vimeouploadcomplete", media_service_1.MediaService.GetMeta(vimeoId));
+            });
+        }
+        else {
+            event_service_1.EventService.Dispatch("vimeouploadcomplete", media_service_1.MediaService.GetMeta(vimeoId));
+        }
     };
     /**
      * on method to add a listener. See config/config.ts for a list of available events
@@ -994,8 +1004,9 @@ var MediaService = (function () {
      * @param upgrade_to_1080
      * @param useDefaultFileName
      */
-    function MediaService(httpService, file, data, upgrade_to_1080, useDefaultFileName) {
+    function MediaService(httpService, file, data, upgrade_to_1080, useDefaultFileName, editVideoOnComplete) {
         this.httpService = httpService;
+        this.editVideoOnComplete = editVideoOnComplete;
         if (useDefaultFileName) {
             data["name"] = file.name;
         }
@@ -1024,12 +1035,13 @@ var MediaService = (function () {
      * @returns {{id: number, link: (any|HTMLLinkElement|(function(string): string)), name: any, uri: any, createdTime: any}}
      */
     MediaService.GetMeta = function (vimeoId, data) {
+        if (data === void 0) { data = null; }
         return {
             id: vimeoId,
-            link: data.link,
-            name: data.name,
-            uri: data.uri,
-            createdTime: data.created_time
+            link: data.link || null,
+            name: data.name || null,
+            uri: data.uri || null,
+            createdTime: data.created_time || null
         };
     };
     return MediaService;

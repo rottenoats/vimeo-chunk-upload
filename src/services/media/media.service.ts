@@ -22,7 +22,8 @@ export class MediaService {
         file: File,
         data: any,
         upgrade_to_1080: boolean,
-        useDefaultFileName: boolean
+        useDefaultFileName: boolean,
+        public editVideoOnComplete: boolean
     ){
         if(useDefaultFileName){
             data["name"] = file.name;
@@ -54,13 +55,13 @@ export class MediaService {
      * @param {object} data
      * @returns {{id: number, link: (any|HTMLLinkElement|(function(string): string)), name: any, uri: any, createdTime: any}}
      */
-    public static GetMeta(vimeoId: number, data: any): Object{
+    public static GetMeta(vimeoId: number, data: any = null): Object{
         return {
             id:             vimeoId,
-            link:           data.link,
-            name:           data.name,
-            uri:            data.uri,
-            createdTime:    data.created_time
+            link:           data.link           || null,
+            name:           data.name           || null,
+            uri:            data.uri            || null,
+            createdTime:    data.created_time   || null
         };
     }
 }

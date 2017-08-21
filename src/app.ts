@@ -51,7 +51,8 @@ export class App {
             values.file,
             values.videoData,
             values.upgrade_to_1080,
-            values.useDefaultFileName
+            values.useDefaultFileName,
+            values.editVideoOnComplete
         );
         this.chunkService = new ChunkService(
             this.mediaService,
@@ -198,12 +199,20 @@ export class App {
      * @param vimeoId
      */
     private updateVideo(vimeoId: number){
-        this.mediaService.updateVideoData(this.ticketService.token, vimeoId).then((response: Response) => {
-            let meta = MediaService.GetMeta(vimeoId, response.data);
-            EventService.Dispatch("vimeouploadcomplete", meta);
-        }).catch(error=>{
-            EventService.Dispatch("vimeouploaderror", { message: `Unable to update video ${vimeoId} with name and description.`, error})
-        });
+        if(this.mediaService.editVideoOnComplete) {
+            this.mediaService.updateVideoData(this.ticketService.token, vimeoId).then((response:Response) => {
+                let meta = MediaService.GetMeta(vimeoId, response.data);
+                EventService.Dispatch("vimeouploadcomplete", meta);
+            }).catch(error=> {
+                EventService.Dispatch("vimeouploaderror", {
+                    message: `Unable to update video ${vimeoId} with name and description.`,
+                    error
+                });
+                EventService.Dispatch("vimeouploadcomplete", MediaService.GetMeta(vimeoId))
+            });
+        }else{
+            EventService.Dispatch("vimeouploadcomplete", MediaService.GetMeta(vimeoId))
+        }
     }
 
     /**

@@ -16,7 +16,8 @@ export const DEFAULT_VALUES = {
   maxAcceptedUploadDuration: 60,
   useDefaultFileName:       false,
   retryTimeout:             5000,
-  videoData:                {} //See link for a full list of supported metaData | https://developer.vimeo.com/api/endpoints/videos#PATCH/videos/{video_id}
+  videoData:                {}, //See link for a full list of supported metaData | https://developer.vimeo.com/api/endpoints/videos#PATCH/videos/{video_id}
+  editVideoOnComplete:      true,
 };
 
 
