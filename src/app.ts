@@ -184,7 +184,7 @@ export class App {
                 this.updateVideo(vimeoId);
 
             }catch(error){
-                console.log(`Error retrieving Vimeo Id.`);
+                console.log(`Error retrieving Vimeo Id.`, e);
             }
 
             console.log(`Delete success:`, response);
