@@ -32,7 +32,6 @@ export class App {
      * @param options
      */
     public init(options: any = {}){
-
         let values: any = {};
 
         //We loop through all the default values and see if options overides specific ones. All new properties are added to values object.
@@ -87,8 +86,8 @@ export class App {
         this.init(options);
 
         //TODO: Add error if not supported.
-
-        if(!this.validatorService.isSupported(this.mediaService.media.file)) return;
+        console.log(this.mediaService.media.file);
+        //TODO: Temporary: if(!this.validatorService.isSupported(this.mediaService.media.file)) return;
         this.ticketService.open()
             .then((response: Response)=>{
                 console.log(response);
@@ -119,7 +118,7 @@ export class App {
         }).catch(error=>{
             if(this.canContinue()){
                 this.failCount++;
-                EventService.Dispatch("vimeouploaderror", { message:`Error sending chunk.`, error});
+                EventService.Dispatch("vimeouploadwarning", { message:`Unable to send chunk.`, error});
                 this.chunkService.updateSize(this.statService.getChunkUploadDuration());
                 setTimeout(()=>{
                     this.check();
@@ -156,7 +155,7 @@ export class App {
                     console.warn(`Unrecognized status code (${response.status}) for chunk range.`)
             }
         }).catch(error=>{
-            EventService.Dispatch("vimeouploaderror", { message: `Unable to get range.`, error});
+            EventService.Dispatch("vimeouploadwarning", { message: `Unable to get range.`, error});
             if(this.canContinue()){
                 this.failCount++;
                 setTimeout(()=>{

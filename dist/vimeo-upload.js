@@ -79,7 +79,7 @@ var status_enum_1 = __webpack_require__(1);
 /**
  * Created by kfaulhaber on 31/03/2017.
  */
-var HttpService = (function () {
+var HttpService = /** @class */ (function () {
     /**
      * constructor
      * @param maxAcceptedUploadDuration
@@ -228,7 +228,7 @@ var Status;
  * Created by kfaulhaber on 17/07/2017.
  */
 exports.__esModule = true;
-var TimeUtil = (function () {
+var TimeUtil = /** @class */ (function () {
     function TimeUtil() {
     }
     /**
@@ -321,9 +321,42 @@ exports.DEFAULT_VALUES = {
 exports.DEFAULT_EVENTS = {
     chunkprogresschanged: function (event) { return console.log("Default: Chunk Progress Update: " + event.detail + "/100"); },
     totalprogresschanged: function (event) { return console.log("Default: Total Progress Update: " + event.detail + "/100"); },
+    //Only for FATAL errors
     vimeouploaderror: function () { },
-    vimeouploadcomplete: function () { }
+    vimeouploadcomplete: function () { },
+    //All other errors
+    vimeouploadwarning: function () { }
 };
+exports.ERRORS = [
+    {
+        id: "001",
+        code: "CHUNK_ERROR",
+        title: "Chunk upload failed.",
+        detail: "Partial upload failed.",
+        type: "minor"
+    },
+    {
+        id: "002",
+        code: "CHUNK_ABORT",
+        title: "Chunk upload was aborted.",
+        detail: "Partial upload exceeded maximum time limit.",
+        type: "minor"
+    },
+    {
+        id: "003",
+        code: "MAX_FAILURE_LIMIT_ATTAINED",
+        title: "Maximum failure limit attained.",
+        detail: "Number of accepted minor errors exceeded.",
+        type: "fatal"
+    },
+    {
+        id: "004",
+        code: "EDIT_PERMISSION_DENIED",
+        title: "Edit scope was not provided.",
+        detail: "A the [EDIT] scope is required to add a name and description after a video has been uploaded.",
+        type: "minor"
+    }
+];
 
 
 /***/ }),
@@ -342,7 +375,7 @@ var config_1 = __webpack_require__(4);
  * Composed of static methods for handly events
  *
  */
-var EventService = (function () {
+var EventService = /** @class */ (function () {
     function EventService() {
     }
     /**
@@ -432,7 +465,7 @@ var validator_service_1 = __webpack_require__(16);
 var media_service_1 = __webpack_require__(17);
 var http_service_1 = __webpack_require__(0);
 var stat_service_1 = __webpack_require__(19);
-var App = (function () {
+var App = /** @class */ (function () {
     function App() {
         //Defining other properties
         this.failCount = 0;
@@ -469,8 +502,8 @@ var App = (function () {
         if (options === void 0) { options = {}; }
         this.init(options);
         //TODO: Add error if not supported.
-        if (!this.validatorService.isSupported(this.mediaService.media.file))
-            return;
+        console.log(this.mediaService.media.file);
+        //TODO: Temporary: if(!this.validatorService.isSupported(this.mediaService.media.file)) return;
         this.ticketService.open()
             .then(function (response) {
             console.log(response);
@@ -499,7 +532,7 @@ var App = (function () {
         })["catch"](function (error) {
             if (_this.canContinue()) {
                 _this.failCount++;
-                event_service_1.EventService.Dispatch("vimeouploaderror", { message: "Error sending chunk.", error: error });
+                event_service_1.EventService.Dispatch("vimeouploadwarning", { message: "Unable to send chunk.", error: error });
                 _this.chunkService.updateSize(_this.statService.getChunkUploadDuration());
                 setTimeout(function () {
                     _this.check();
@@ -535,7 +568,7 @@ var App = (function () {
                     console.warn("Unrecognized status code (" + response.status + ") for chunk range.");
             }
         })["catch"](function (error) {
-            event_service_1.EventService.Dispatch("vimeouploaderror", { message: "Unable to get range.", error: error });
+            event_service_1.EventService.Dispatch("vimeouploadwarning", { message: "Unable to get range.", error: error });
             if (_this.canContinue()) {
                 _this.failCount++;
                 setTimeout(function () {
@@ -645,7 +678,7 @@ var routes_1 = __webpack_require__(3);
 /**
  * Created by kfaulhaber on 30/06/2017.
  */
-var TicketService = (function () {
+var TicketService = /** @class */ (function () {
     /**
      * constructor that takes 3 paramaters
      * @param token
@@ -708,7 +741,7 @@ exports.__esModule = true;
  * Custom Request Entity
  *
  */
-var Request = (function () {
+var Request = /** @class */ (function () {
     function Request(method, url, data, headers) {
         if (data === void 0) { data = null; }
         if (headers === void 0) { headers = []; }
@@ -734,7 +767,7 @@ exports.Request = Request;
  * Header Class Entity
  */
 exports.__esModule = true;
-var Header = (function () {
+var Header = /** @class */ (function () {
     function Header(title, value) {
         this.title = title;
         this.value = value;
@@ -758,7 +791,7 @@ var status_enum_1 = __webpack_require__(1);
  * Custom Response Entity
  *
  */
-var Response = (function () {
+var Response = /** @class */ (function () {
     function Response(status, statusText, data) {
         if (data === void 0) { data = null; }
         this.status = status;
@@ -784,7 +817,7 @@ exports.Response = Response;
  *
  */
 exports.__esModule = true;
-var Ticket = (function () {
+var Ticket = /** @class */ (function () {
     function Ticket(uploadLinkSecure, ticketId, uploadLink, completeUri, user) {
         this.uploadLinkSecure = uploadLinkSecure;
         this.ticketId = ticketId;
@@ -808,7 +841,7 @@ var chunk_1 = __webpack_require__(14);
 /**
  * Created by kfaulhaber on 30/06/2017.
  */
-var ChunkService = (function () {
+var ChunkService = /** @class */ (function () {
     /**
      * constructor
      * @param mediaService
@@ -876,7 +909,7 @@ exports.ChunkService = ChunkService;
  *
  */
 exports.__esModule = true;
-var Chunk = (function () {
+var Chunk = /** @class */ (function () {
     function Chunk(content, contentRange) {
         this.content = content;
         this.contentRange = contentRange;
@@ -897,7 +930,7 @@ var http_service_1 = __webpack_require__(0);
 /**
  * Created by kfaulhaber on 30/06/2017.
  */
-var UploadService = (function () {
+var UploadService = /** @class */ (function () {
     /**
      * constructor that has mulitple dependencies to other services
      * @param mediaService
@@ -951,7 +984,7 @@ exports.UploadService = UploadService;
  * Created by kfaulhaber on 30/06/2017.
  */
 exports.__esModule = true;
-var ValidatorService = (function () {
+var ValidatorService = /** @class */ (function () {
     /**
      * constructor that takes in a list of supported video files
      * @param supportedFiles
@@ -995,7 +1028,7 @@ var routes_1 = __webpack_require__(3);
 /**
  * Created by kfaulhaber on 21/07/2017.
  */
-var MediaService = (function () {
+var MediaService = /** @class */ (function () {
     /**
      * constructor that initiates the services with the list of dependencies
      * @param httpService
@@ -1035,7 +1068,7 @@ var MediaService = (function () {
      * @returns {{id: number, link: (any|HTMLLinkElement|(function(string): string)), name: any, uri: any, createdTime: any}}
      */
     MediaService.GetMeta = function (vimeoId, data) {
-        if (data === void 0) { data = null; }
+        if (data === void 0) { data = {}; }
         return {
             id: vimeoId,
             link: data.link || null,
@@ -1059,7 +1092,7 @@ exports.MediaService = MediaService;
  * Created by kfaulhaber on 20/07/2017.
  */
 exports.__esModule = true;
-var Media = (function () {
+var Media = /** @class */ (function () {
     /**
      * constructor
      * @param file
@@ -1092,7 +1125,7 @@ var stat_data_1 = __webpack_require__(20);
  * Service that takes care of checking the total uploaded content and dispatches events to notify all listeners.
  *
  */
-var StatService = (function () {
+var StatService = /** @class */ (function () {
     /**
      * constructor that takes two dependencies timerInterval and chunkService
      * @param timeInterval
@@ -1218,7 +1251,7 @@ exports.StatService = StatService;
  *
  */
 exports.__esModule = true;
-var StatData = (function () {
+var StatData = /** @class */ (function () {
     function StatData(start, end, prefferedDuration, loaded, total, done) {
         if (loaded === void 0) { loaded = 0; }
         if (total === void 0) { total = 0; }
