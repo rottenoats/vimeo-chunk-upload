@@ -46,7 +46,7 @@ export class ChunkService {
 
         return new Chunk(
             content,
-            `bytes ${this.offset}-${end}/${this.mediaService.media.file.size}`
+            `bytes ${this.offset}-${(end-1)}/${this.mediaService.media.file.size}`
         )
     }
 
@@ -56,6 +56,7 @@ export class ChunkService {
      */
     public updateOffset(range: string){
         this.offset = parseInt(range.match(/\d+/g).pop(), 10) + 1;
+        console.log(`Offset returned by the server: ${this.offset}`);
     }
 
     /**

@@ -874,7 +874,7 @@ var ChunkService = /** @class */ (function () {
             this.updateSize(end - this.offset);
         }
         var content = this.mediaService.media.file.slice(this.offset, end);
-        return new chunk_1.Chunk(content, "bytes " + this.offset + "-" + end + "/" + this.mediaService.media.file.size);
+        return new chunk_1.Chunk(content, "bytes " + this.offset + "-" + (end - 1) + "/" + this.mediaService.media.file.size);
     };
     /**
      * updateOffset method that takes a range and updates the offset.
@@ -882,6 +882,7 @@ var ChunkService = /** @class */ (function () {
      */
     ChunkService.prototype.updateOffset = function (range) {
         this.offset = parseInt(range.match(/\d+/g).pop(), 10) + 1;
+        console.log("Offset returned by the server: " + this.offset);
     };
     /**
      * isDone method that checks to see if the offset is or is superior to the file size.
