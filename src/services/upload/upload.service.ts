@@ -52,6 +52,7 @@ export class UploadService {
             'Content-Type': this.mediaService.media.file.type,
             'Content-Range': 'bytes */* '
         });
+        console.log(request);
         return this.httpService.send(request);
     }
 }

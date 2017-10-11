@@ -546,13 +546,14 @@ var App = /** @class */ (function () {
     App.prototype.check = function () {
         var _this = this;
         this.uploadService.getRange().then(function (response) {
+            console.log(response);
             switch (response.status) {
                 case 308:
                     //noinspection TypeScriptValidateTypes
                     var range = response.responseHeaders.find(function (header) {
                         if (header === null && header === undefined)
                             return false;
-                        return header.title === "Range";
+                        return header.title.toLowerCase() === "range";
                     });
                     _this.chunkService.updateOffset(range.value);
                     if (_this.chunkService.isDone()) {
@@ -591,7 +592,7 @@ var App = /** @class */ (function () {
                     //noinspection TypeScriptValidateTypes
                     if (header === null && header === undefined)
                         return false;
-                    return header.title === "Location";
+                    return header.title.toLowerCase() === "location";
                 }).value.replace("/videos/", ""));
                 _this.updateVideo(vimeoId);
             }
@@ -968,6 +969,7 @@ var UploadService = /** @class */ (function () {
             'Content-Type': this.mediaService.media.file.type,
             'Content-Range': 'bytes */* '
         });
+        console.log(request);
         return this.httpService.send(request);
     };
     return UploadService;

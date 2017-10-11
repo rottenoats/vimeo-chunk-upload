@@ -236,6 +236,10 @@
             console.log("Meta data", event.detail);
         });
 
+        vimeoUpload.on("vimeouploadwarning", function (event) {
+            console.log(event.detail.message, event.detail.error);
+        });
+
         function handleFileSelect(evt){
             console.log("HandleFileSelect detected.");
             evt.stopPropagation();

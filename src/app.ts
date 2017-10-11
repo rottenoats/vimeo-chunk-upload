@@ -132,13 +132,15 @@ export class App {
      */
     private check(){
         this.uploadService.getRange().then((response: Response) => {
+
+            console.log(response);
             switch(response.status){
                 case 308:
 
                     //noinspection TypeScriptValidateTypes
                     let range: Header = response.responseHeaders.find((header: Header) => {
                         if(header === null && header === undefined) return false;
-                        return header.title === "Range";
+                        return header.title.toLowerCase() === "range";
                     });
 
                     this.chunkService.updateOffset(range.value);
@@ -178,7 +180,7 @@ export class App {
                 let vimeoId: number = parseInt(response.responseHeaders.find((header: Header) => {
                     //noinspection TypeScriptValidateTypes
                     if(header === null && header === undefined) return false;
-                    return header.title === "Location";
+                    return header.title.toLowerCase() === "location";
                 }).value.replace("/videos/", ""));
                 this.updateVideo(vimeoId);
 
