@@ -42,7 +42,6 @@ export class MediaService {
 
         let params = this.media.data;
         let query = Object.keys(params).map(key=>`${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`).join('&');
-        console.log(query);
         let request = HttpService.CreateRequest("PATCH", VIMEO_ROUTES.VIDEOS(vimeoId), query, {
             Authorization: `Bearer ${token}`
         });

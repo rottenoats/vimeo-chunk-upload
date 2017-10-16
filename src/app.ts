@@ -86,7 +86,6 @@ export class App {
         this.init(options);
 
         //TODO: Add error if not supported.
-        console.log(this.mediaService.media.file);
         //TODO: Temporary: if(!this.validatorService.isSupported(this.mediaService.media.file)) return;
         this.ticketService.open()
             .then((response: Response)=>{
@@ -132,8 +131,6 @@ export class App {
      */
     private check(){
         this.uploadService.getRange().then((response: Response) => {
-
-            console.log(response);
             switch(response.status){
                 case 308:
 

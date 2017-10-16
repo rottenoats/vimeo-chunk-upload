@@ -55,8 +55,7 @@ export class ChunkService {
      * @param range
      */
     public updateOffset(range: string){
-        this.offset = parseInt(range.match(/\d+/g).pop(), 10) + 1;
-        console.log(`Offset returned by the server: ${this.offset}`);
+        this.offset = parseInt(range.match(/\d+/g).pop(), 10);
     }
 
     /**

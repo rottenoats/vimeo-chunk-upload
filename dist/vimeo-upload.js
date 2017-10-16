@@ -502,7 +502,6 @@ var App = /** @class */ (function () {
         if (options === void 0) { options = {}; }
         this.init(options);
         //TODO: Add error if not supported.
-        console.log(this.mediaService.media.file);
         //TODO: Temporary: if(!this.validatorService.isSupported(this.mediaService.media.file)) return;
         this.ticketService.open()
             .then(function (response) {
@@ -546,7 +545,6 @@ var App = /** @class */ (function () {
     App.prototype.check = function () {
         var _this = this;
         this.uploadService.getRange().then(function (response) {
-            console.log(response);
             switch (response.status) {
                 case 308:
                     //noinspection TypeScriptValidateTypes
@@ -882,8 +880,7 @@ var ChunkService = /** @class */ (function () {
      * @param range
      */
     ChunkService.prototype.updateOffset = function (range) {
-        this.offset = parseInt(range.match(/\d+/g).pop(), 10) + 1;
-        console.log("Offset returned by the server: " + this.offset);
+        this.offset = parseInt(range.match(/\d+/g).pop(), 10);
     };
     /**
      * isDone method that checks to see if the offset is or is superior to the file size.
@@ -958,6 +955,7 @@ var UploadService = /** @class */ (function () {
             'Content-Type': this.mediaService.media.file.type,
             'Content-Range': chunk.contentRange
         });
+        console.log(chunk.contentRange);
         return this.httpService.send(request, statData);
     };
     /**
@@ -1058,7 +1056,6 @@ var MediaService = /** @class */ (function () {
     MediaService.prototype.updateVideoData = function (token, vimeoId) {
         var params = this.media.data;
         var query = Object.keys(params).map(function (key) { return encodeURIComponent(key) + "=" + encodeURIComponent(params[key]); }).join('&');
-        console.log(query);
         var request = http_service_1.HttpService.CreateRequest("PATCH", routes_1.VIMEO_ROUTES.VIDEOS(vimeoId), query, {
             Authorization: "Bearer " + token
         });

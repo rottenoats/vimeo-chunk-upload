@@ -39,6 +39,7 @@ export class UploadService {
                 'Content-Type': this.mediaService.media.file.type,
                 'Content-Range': chunk.contentRange
             });
+            console.log(chunk.contentRange);
 
             return this.httpService.send(request, statData);
     }
