@@ -71,7 +71,6 @@ List of options that can be overriden.
 | videoData                 | Object that supports all video data properties. See link for more info: https://developer.vimeo.com/api/endpoints/videos#PATCH/videos/{video_id}                          | {}                                                                     | Optional
 | preferredUploadDuration   | The preferred chunk upload duration. The chunk size will be updated after each chunk upload to best fit the prefferedUploadDuration.                                      | 20 [seconds]                                                           | Optional |
 | chunkSize                 | The size of the chunk to be uploaded                                                                                                                                      | 1024*1024                                                              | Optional |
-| supportedFiles            | A list of supported file extensions.                                                                                                                                      | ["mov", "mpeg4", "mp4", "avi", "wmv", "mpegps", "flv", "3gpp", "webm"] | Optional |
 | upgrade_to_1080           | Upgrade the video to 1080                                                                                                                                                 | false                                                                  | Optional |
 | timeInterval              | Time interval for event data to be dispatched.                                                                                                                            | 150 [miliseconds]                                                      | Optional |
 | maxAcceptedFails          | The number of failures that can occur before the upload is terminated. Fails occur whenever a request fails. Setting this to 0 will allow for unlimited amount of fails.  | 20                                                                     | Optional |
@@ -92,7 +91,6 @@ var options = {
     videoData:                {}, //Check link to see all supported properties | https://developer.vimeo.com/api/endpoints/videos#PATCH/videos/{video_id}
     preferredUploadDuration:  20,
     chunkSize:                1024*1024,
-    supportedFiles:           ["mov", "mpeg4", "mp4", "avi", "wmv", "mpegps", "flv", "3gpp", "webm"],
     upgrade_to_1080:          false,
     timeInterval:             150,
     maxAcceptedFails:         20,

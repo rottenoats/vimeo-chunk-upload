@@ -42,8 +42,7 @@ export class StatService {
     public create(isTotal: boolean = false): StatData {
         let date = new Date();
         let size = (isTotal) ? this.chunkService.mediaService.media.file.size : this.chunkService.size;
-        let statData = new StatData(date, date, this.chunkService.preferredUploadDuration, 0, size);
-        return statData;
+        return new StatData(date, date, this.chunkService.preferredUploadDuration, 0, size);
     }
 
     /**
@@ -85,36 +84,47 @@ export class StatService {
      * startInterval method that starts the interval loop to continously dispatch events with updated information on what has been uploaded.
      */
     public startInterval(){
+
+        //If a previous interval exists, stop it.
         if(this.si > -1){
             this.stop();
         }
 
+        //Create the new loop
         this.si = setInterval(()=>{
 
+            //Calculate the chup upload percent
             let chunkPercent = this.calculatePercent(this.chunkStatData.loaded, this.chunkStatData.total);
+
+            //If the chunk upload is completed we set the chunkPercent to 100 and reset the chunkStatDatat to 0
             if(this.chunkStatData.done){
                 this.updateTotal();
                 this.chunkStatData.total = this.chunkStatData.loaded = 0;
                 chunkPercent = 100;
             }
 
+            //Update the total uploaded
             this.totalStatData.loaded = Math.max(this.chunkService.offset, this.totalStatData.loaded);
 
+            //Set the end to the chunk end
             this.totalStatData.end = this.chunkStatData.end;
+            //Set the previous total percent value to the new highest
             this.previousTotalPercent = Math.max(this.totalStatData.loaded + this.chunkStatData.loaded, this.previousTotalPercent);
 
-
+            //Calculate the current total percent
             let totalPercent = this.calculatePercent(
                 this.previousTotalPercent,
                 this.totalStatData.total
             );
-            
+
+            //emit chunk percent
             EventService.Dispatch("chunkprogresschanged", chunkPercent);
 
             if(this.totalStatData.done){
                 totalPercent = 100;
             }
 
+            //emit total percent
             EventService.Dispatch("totalprogresschanged", totalPercent);
 
         }, this.timeInterval)

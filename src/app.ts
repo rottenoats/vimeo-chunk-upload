@@ -3,7 +3,6 @@ import {ChunkService} from "./services/chunk/chunk.service";
 import {UploadService} from "./services/upload/upload.service";
 import {DEFAULT_VALUES} from "./config/config";
 import {EventService} from "./services/event/event.service";
-import {ValidatorService} from "./services/validator/validator.service";
 import {MediaService} from "./services/media/media.service";
 import {Response} from "./entities/response";
 import {HttpService} from "./services/http/http.service";
@@ -16,14 +15,16 @@ export class App {
     private ticketService: TicketService;
     private chunkService: ChunkService;
     private uploadService: UploadService;
-    private validatorService: ValidatorService;
     private mediaService: MediaService;
     private statService: StatService;
     private httpService: HttpService;
 
     //Defining other properties
+    //Total amount of chunk upload failures
     private failCount: number = 0;
+    //Max accepted amount of chunk upload failures
     private maxAcceptedFails: number;
+    //Timeout when a chunk upload fails.
     private retryTimeout: number;
 
     /**
@@ -73,9 +74,6 @@ export class App {
             this.httpService,
             this.statService
         );
-        this.validatorService = new ValidatorService(
-            values.supportedFiles
-        );
     }
 
     /**
@@ -85,11 +83,8 @@ export class App {
     public start(options: any = {}){
         this.init(options);
 
-        //TODO: Add error if not supported.
-        //TODO: Temporary: if(!this.validatorService.isSupported(this.mediaService.media.file)) return;
         this.ticketService.open()
             .then((response: Response)=>{
-                console.log(response);
                 this.ticketService.save(response);
                 this.statService.start();
                 this.process();
@@ -244,7 +239,7 @@ export class App {
      * @returns {boolean}
      */
     private canContinue(): boolean {
-        return (this.maxAcceptedFails === 0) ? true : (this.failCount <= this.maxAcceptedFails) ? true : false;
+        return (this.maxAcceptedFails === 0) ? true : (this.failCount <= this.maxAcceptedFails);
     }
     
 }

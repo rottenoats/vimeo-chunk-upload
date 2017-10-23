@@ -269,10 +269,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            var dropZone = document.getElementById('drop_zone')
-            var browse = document.getElementById('browse')
-            dropZone.addEventListener('dragover', handleDragOver, false)
-            dropZone.addEventListener('drop', handleFileSelect, false)
+            var dropZone = document.getElementById('drop_zone');
+            var browse = document.getElementById('browse');
+            dropZone.addEventListener('dragover', handleDragOver, false);
+            dropZone.addEventListener('drop', handleFileSelect, false);
             browse.addEventListener('change', handleFileSelect, false)
         });
 

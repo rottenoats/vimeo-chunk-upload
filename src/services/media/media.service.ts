@@ -16,6 +16,7 @@ export class MediaService {
      * @param data
      * @param upgrade_to_1080
      * @param useDefaultFileName
+     * @param editVideoOnComplete
      */
     constructor(
         public httpService: HttpService,

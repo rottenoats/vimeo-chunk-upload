@@ -305,7 +305,6 @@ exports.DEFAULT_VALUES = {
     preferredUploadDuration: 20,
     chunkSize: 1024 * 1024,
     token: "TOKEN_STRING_HERE",
-    supportedFiles: ["mov", "mpeg4", "mp4", "avi", "wmv", "mpegps", "flv", "3gpp", "webm"],
     name: "",
     description: "",
     file: null,
@@ -461,13 +460,13 @@ var chunk_service_1 = __webpack_require__(13);
 var upload_service_1 = __webpack_require__(15);
 var config_1 = __webpack_require__(4);
 var event_service_1 = __webpack_require__(5);
-var validator_service_1 = __webpack_require__(16);
-var media_service_1 = __webpack_require__(17);
+var media_service_1 = __webpack_require__(16);
 var http_service_1 = __webpack_require__(0);
-var stat_service_1 = __webpack_require__(19);
+var stat_service_1 = __webpack_require__(18);
 var App = /** @class */ (function () {
     function App() {
         //Defining other properties
+        //Total amount of chunk upload failures
         this.failCount = 0;
     }
     /**
@@ -491,7 +490,6 @@ var App = /** @class */ (function () {
         this.statService = new stat_service_1.StatService(values.timeInterval, this.chunkService);
         this.ticketService = new ticket_service_1.TicketService(values.token, this.httpService, values.upgrade_to_1080);
         this.uploadService = new upload_service_1.UploadService(this.mediaService, this.ticketService, this.httpService, this.statService);
-        this.validatorService = new validator_service_1.ValidatorService(values.supportedFiles);
     };
     /**
      * Start method that'll initiate the upload, create the upload ticket and start the upload loop.
@@ -501,11 +499,8 @@ var App = /** @class */ (function () {
         var _this = this;
         if (options === void 0) { options = {}; }
         this.init(options);
-        //TODO: Add error if not supported.
-        //TODO: Temporary: if(!this.validatorService.isSupported(this.mediaService.media.file)) return;
         this.ticketService.open()
             .then(function (response) {
-            console.log(response);
             _this.ticketService.save(response);
             _this.statService.start();
             _this.process();
@@ -657,7 +652,7 @@ var App = /** @class */ (function () {
      * @returns {boolean}
      */
     App.prototype.canContinue = function () {
-        return (this.maxAcceptedFails === 0) ? true : (this.failCount <= this.maxAcceptedFails) ? true : false;
+        return (this.maxAcceptedFails === 0) ? true : (this.failCount <= this.maxAcceptedFails);
     };
     return App;
 }());
@@ -981,49 +976,8 @@ exports.UploadService = UploadService;
 
 "use strict";
 
-/**
- * Created by kfaulhaber on 30/06/2017.
- */
 exports.__esModule = true;
-var ValidatorService = /** @class */ (function () {
-    /**
-     * constructor that takes in a list of supported video files
-     * @param supportedFiles
-     */
-    function ValidatorService(supportedFiles) {
-        this.supportedFiles = supportedFiles;
-    }
-    /**
-     * Method that takes a file and decides whether it's supported
-     * @param file
-     * @returns {boolean}
-     */
-    ValidatorService.prototype.isSupported = function (file) {
-        var type = file.type;
-        if (type.indexOf('/') === -1) {
-            console.warn("Wrong type found (" + type + ").");
-            return false;
-        }
-        var split = type.split('/');
-        if (split[0] !== "video") {
-            console.warn("Only videos are supported, " + type + " given.");
-            return false;
-        }
-        return this.supportedFiles.includes(split[1]);
-    };
-    return ValidatorService;
-}());
-exports.ValidatorService = ValidatorService;
-
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-exports.__esModule = true;
-var media_1 = __webpack_require__(18);
+var media_1 = __webpack_require__(17);
 var http_service_1 = __webpack_require__(0);
 var routes_1 = __webpack_require__(3);
 /**
@@ -1037,6 +991,7 @@ var MediaService = /** @class */ (function () {
      * @param data
      * @param upgrade_to_1080
      * @param useDefaultFileName
+     * @param editVideoOnComplete
      */
     function MediaService(httpService, file, data, upgrade_to_1080, useDefaultFileName, editVideoOnComplete) {
         this.httpService = httpService;
@@ -1083,7 +1038,7 @@ exports.MediaService = MediaService;
 
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1110,7 +1065,7 @@ exports.Media = Media;
 
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1118,7 +1073,7 @@ exports.Media = Media;
 exports.__esModule = true;
 var event_service_1 = __webpack_require__(5);
 var utils_1 = __webpack_require__(2);
-var stat_data_1 = __webpack_require__(20);
+var stat_data_1 = __webpack_require__(19);
 /**
  * Created by Grimbode on 14/07/2017.
  *
@@ -1153,8 +1108,7 @@ var StatService = /** @class */ (function () {
         if (isTotal === void 0) { isTotal = false; }
         var date = new Date();
         var size = (isTotal) ? this.chunkService.mediaService.media.file.size : this.chunkService.size;
-        var statData = new stat_data_1.StatData(date, date, this.chunkService.preferredUploadDuration, 0, size);
-        return statData;
+        return new stat_data_1.StatData(date, date, this.chunkService.preferredUploadDuration, 0, size);
     };
     /**
      * save method that takes a statData and saves it to the chunkStatData
@@ -1192,24 +1146,34 @@ var StatService = /** @class */ (function () {
      */
     StatService.prototype.startInterval = function () {
         var _this = this;
+        //If a previous interval exists, stop it.
         if (this.si > -1) {
             this.stop();
         }
+        //Create the new loop
         this.si = setInterval(function () {
+            //Calculate the chup upload percent
             var chunkPercent = _this.calculatePercent(_this.chunkStatData.loaded, _this.chunkStatData.total);
+            //If the chunk upload is completed we set the chunkPercent to 100 and reset the chunkStatDatat to 0
             if (_this.chunkStatData.done) {
                 _this.updateTotal();
                 _this.chunkStatData.total = _this.chunkStatData.loaded = 0;
                 chunkPercent = 100;
             }
+            //Update the total uploaded
             _this.totalStatData.loaded = Math.max(_this.chunkService.offset, _this.totalStatData.loaded);
+            //Set the end to the chunk end
             _this.totalStatData.end = _this.chunkStatData.end;
+            //Set the previous total percent value to the new highest
             _this.previousTotalPercent = Math.max(_this.totalStatData.loaded + _this.chunkStatData.loaded, _this.previousTotalPercent);
+            //Calculate the current total percent
             var totalPercent = _this.calculatePercent(_this.previousTotalPercent, _this.totalStatData.total);
+            //emit chunk percent
             event_service_1.EventService.Dispatch("chunkprogresschanged", chunkPercent);
             if (_this.totalStatData.done) {
                 totalPercent = 100;
             }
+            //emit total percent
             event_service_1.EventService.Dispatch("totalprogresschanged", totalPercent);
         }, this.timeInterval);
     };
@@ -1239,7 +1203,7 @@ exports.StatService = StatService;
 
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
